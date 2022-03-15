@@ -58,7 +58,7 @@ class MeLU(torch.nn.Module):
         self.keep_weight = deepcopy(self.model.state_dict())  #模型的参数
         self.weight_name = list(self.keep_weight.keys())
         self.weight_len = len(self.keep_weight)
-        self.fast_weights = OrderedDict()      #提前更新的参数
+        self.fast_weights = OrderedDict()      #task更新的参数
 
     def forward(self, support_set_x, support_set_y, query_set_x, num_local_update):
         for idx in range(num_local_update):
@@ -77,7 +77,7 @@ class MeLU(torch.nn.Module):
                     self.fast_weights[self.weight_name[i]] = weight_for_local_update[i]
         self.model.load_state_dict(self.fast_weights)  #为了79行的模型预测
         query_set_y_pred = self.model(query_set_x)
-        self.model.load_state_dict(self.keep_weight)   #
+        self.model.load_state_dict(self.keep_weight)   #一个task结束后，模型重新加载模型参数
         return query_set_y_pred
 
     def global_update(self, support_set_xs, support_set_ys, query_set_xs, query_set_ys, num_local_update):
@@ -97,7 +97,7 @@ class MeLU(torch.nn.Module):
         self.meta_optim.zero_grad()
         losses_q.backward()
         self.meta_optim.step()
-        self.store_parameters()
+        self.store_parameters()      #一个batch结束后，keep weight要更新一下（跟模型参数相等）
         return
 
     def get_weight_avg_norm(self, support_set_x, support_set_y, num_local_update):
