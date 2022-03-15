@@ -97,7 +97,7 @@ class MeLU(torch.nn.Module):
         self.meta_optim.zero_grad()
         losses_q.backward()
         self.meta_optim.step()
-        self.store_parameters()      #一个batch结束后，keep weight要更新一下（跟模型参数相等）
+        self.store_parameters()      #一个batch结束后，模型参数已经更新了（99行），所以keep weight要更新一下（跟模型参数相等）
         return
 
     def get_weight_avg_norm(self, support_set_x, support_set_y, num_local_update):
